@@ -59,8 +59,6 @@ KEYOBJS=dropbearkey.o
 
 CONVERTOBJS=dropbearconvert.o keyimport.o
 
-SCPOBJS=scp.o progressmeter.o atomicio.o scpmisc.o compat.o
-
 HEADERS=options.h dbutil.h session.h packet.h algo.h ssh.h buffer.h kex.h \
 		dss.h bignum.h signkey.h rsa.h dbrandom.h service.h auth.h \
 		debug.h channel.h chansession.h config.h queue.h sshpty.h \
@@ -73,7 +71,7 @@ dropbearobjs=$(COMMONOBJS) $(CLISVROBJS) $(SVROBJS)
 dbclientobjs=$(COMMONOBJS) $(CLISVROBJS) $(CLIOBJS)
 dropbearkeyobjs=$(COMMONOBJS) $(KEYOBJS)
 dropbearconvertobjs=$(COMMONOBJS) $(CONVERTOBJS)
-scpobjs=$(SCPOBJS)
+scpobjs=scp.o progressmeter.o atomicio.o scpmisc.o compat.o
 
 VPATH=@srcdir@
 srcdir=@srcdir@
@@ -133,10 +131,14 @@ ifeq ($(STATIC), 1)
 endif
 
 ifeq ($(MULTI), 1)
-	TARGETS=dropbearmulti$(EXEEXT)
+	dropbearmultiobjs=dbmulti.o $(sort $(foreach prog, $(PROGRAMS), $($(prog)objs)))
+	CPPFLAGS+=$(addprefix -DDBMULTI_, $(PROGRAMS)) -DDROPBEAR_MULTI
+	TARGETS_NAMES=dropbearmulti
 else
-	TARGETS=$(PROGRAMS)
+	TARGETS_NAMES=$(PROGRAMS)
 endif
+
+TARGETS=$(addsuffix $(EXEEXT), $(TARGETS_NAMES))
 
 # for the scp progress meter. The -D doesn't affect anything else.
 ifeq ($(SCPPROGRESS), 1)
@@ -146,9 +148,11 @@ endif
 all: $(TARGETS)
 
 strip: $(TARGETS)
-	$(STRIP) $(addsuffix $(EXEEXT), $(TARGETS))
+	$(STRIP) $^
 
-install: $(addprefix inst_, $(TARGETS))
+TARGETS_inst_=$(addprefix inst_, $(TARGETS_NAMES))
+
+install: $(TARGETS_inst_)
 
 insmultidropbear: dropbearmulti$(EXEEXT)
 	$(INSTALL) -d $(DESTDIR)$(sbindir)
@@ -167,13 +171,13 @@ insmulti%: dropbearmulti$(EXEEXT)
 	fi
 
 # dropbear should go in sbin, so it needs a separate rule
-inst_dropbear: dropbear
+inst_dropbear: dropbear$(EXEEXT)
 	$(INSTALL) -d $(DESTDIR)$(sbindir)
 	$(INSTALL) dropbear$(EXEEXT) $(DESTDIR)$(sbindir)
 	$(INSTALL) -d $(DESTDIR)$(mandir)/man8
 	$(INSTALL) -m 644 $(srcdir)/dropbear.8 $(DESTDIR)$(mandir)/man8/dropbear.8
 
-inst_%: %
+inst_%: %$(EXEEXT)
 	$(INSTALL) -d $(DESTDIR)$(bindir)
 	$(INSTALL) $*$(EXEEXT) $(DESTDIR)$(bindir)
 	$(INSTALL) -d $(DESTDIR)$(mandir)/man1
@@ -183,35 +187,23 @@ inst_%: %
 
 inst_dropbearmulti: $(addprefix insmulti, $(PROGRAMS)) 
 
-# for some reason the rule further down doesn't like $($@objs) as a prereq.
-dropbear: $(dropbearobjs)
-dbclient: $(dbclientobjs)
-dropbearkey: $(dropbearkeyobjs)
-dropbearconvert: $(dropbearconvertobjs)
+dropbear$(EXEEXT): $(HEADERS) $(dropbearobjs) $(LIBTOM_DEPS)
+	$(CC) $(LDFLAGS) -o $@ $(dropbearobjs) $(LIBTOM_LIBS) $(LIBS) @CRYPTLIB@
 
-dropbear: $(HEADERS) $(LIBTOM_DEPS) Makefile
-	$(CC) $(LDFLAGS) -o $@$(EXEEXT) $($@objs) $(LIBTOM_LIBS) $(LIBS) @CRYPTLIB@
+dbclient$(EXEEXT): $(HEADERS) $(dbclientobjs) $(LIBTOM_DEPS)
+	$(CC) $(LDFLAGS) -o $@ $(dbclientobjs) $(LIBTOM_LIBS) $(LIBS)
 
-dbclient: $(HEADERS) $(LIBTOM_DEPS) Makefile
-	$(CC) $(LDFLAGS) -o $@$(EXEEXT) $($@objs) $(LIBTOM_LIBS) $(LIBS)
+dropbearkey$(EXEEXT): $(HEADERS) $(dropbearkeyobjs) $(LIBTOM_DEPS)
+	$(CC) $(LDFLAGS) -o $@ $(dropbearkeyobjs) $(LIBTOM_LIBS) $(LIBS)
 
-dropbearkey dropbearconvert: $(HEADERS) $(LIBTOM_DEPS) Makefile
-	$(CC) $(LDFLAGS) -o $@$(EXEEXT) $($@objs) $(LIBTOM_LIBS)
+dropbearconvert$(EXEEXT): $(HEADERS) $(dropbearconvertobjs) $(LIBTOM_DEPS)
+	$(CC) $(LDFLAGS) -o $@ $(dropbearconvertobjs) $(LIBTOM_LIBS)
 
-# scp doesn't use the libs so is special.
-scp: $(SCPOBJS)  $(HEADERS) Makefile
-	$(CC) $(LDFLAGS) -o $@$(EXEEXT) $(SCPOBJS)
+scp$(EXEEXT): $(HEADERS) $(scpobjs)
+	$(CC) $(LDFLAGS) -o $@ $(scpobjs)
 
-
-# multi-binary compilation.
-MULTIOBJS=
-ifeq ($(MULTI),1)
-	MULTIOBJS=dbmulti.o $(sort $(foreach prog, $(PROGRAMS), $($(prog)objs)))
-	CPPFLAGS+=$(addprefix -DDBMULTI_, $(PROGRAMS)) -DDROPBEAR_MULTI
-endif
-
-dropbearmulti$(EXEEXT): $(HEADERS) $(MULTIOBJS) $(LIBTOM_DEPS) Makefile
-	$(CC) $(LDFLAGS) -o $@ $(MULTIOBJS) $(LIBTOM_LIBS) $(LIBS) @CRYPTLIB@
+dropbearmulti$(EXEEXT): $(HEADERS) $(dropbearmultiobjs) $(LIBTOM_DEPS)
+	$(CC) $(LDFLAGS) -o $@ $(dropbearmultiobjs) $(LIBTOM_LIBS) $(LIBS) @CRYPTLIB@
 
 multibinary: dropbearmulti$(EXEEXT)
 
