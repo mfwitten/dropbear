@@ -145,15 +145,19 @@ ifeq ($(SCPPROGRESS), 1)
 	CPPFLAGS+=-DPROGRESS_METER
 endif
 
+.PHONY: all
 all: $(TARGETS)
 
+.PHONY: strip
 strip: $(TARGETS)
 	$(STRIP) $^
 
 TARGETS_inst_=$(addprefix inst_, $(TARGETS_NAMES))
 
+.PHONY: install
 install: $(TARGETS_inst_)
 
+.PHONY: insmultidropbear
 insmultidropbear: dropbearmulti$(EXEEXT)
 	$(INSTALL) -d $(DESTDIR)$(sbindir)
 	-rm -f $(DESTDIR)$(sbindir)/dropbear$(EXEEXT)
@@ -161,7 +165,10 @@ insmultidropbear: dropbearmulti$(EXEEXT)
 	$(INSTALL) -d $(DESTDIR)$(mandir)/man8
 	$(INSTALL) -m 644 $(srcdir)/dropbear.8  $(DESTDIR)$(mandir)/man8/dropbear.8
 
-insmulti%: dropbearmulti$(EXEEXT)
+PROGRAMS_insmulti=$(addprefix insmulti, $(PROGRAMS))
+
+.PHONY: $(PROGRAMS_insmulti)
+$(filter-out insmultidropbear,$(PROGRAMS_insmulti)): insmulti%: dropbearmulti$(EXEEXT)
 	$(INSTALL) -d $(DESTDIR)$(bindir)
 	-rm -f $(DESTDIR)$(bindir)/$*$(EXEEXT) 
 	-ln -s $(bindir)/dropbearmulti$(EXEEXT) $(DESTDIR)$(bindir)/$*$(EXEEXT) 
@@ -171,13 +178,15 @@ insmulti%: dropbearmulti$(EXEEXT)
 	fi
 
 # dropbear should go in sbin, so it needs a separate rule
+.PHONY: inst_dropbear
 inst_dropbear: dropbear$(EXEEXT)
 	$(INSTALL) -d $(DESTDIR)$(sbindir)
 	$(INSTALL) dropbear$(EXEEXT) $(DESTDIR)$(sbindir)
 	$(INSTALL) -d $(DESTDIR)$(mandir)/man8
 	$(INSTALL) -m 644 $(srcdir)/dropbear.8 $(DESTDIR)$(mandir)/man8/dropbear.8
 
-inst_%: %$(EXEEXT)
+.PHONY: $(TARGETS_inst_)
+$(filter-out inst_dropbear,$(TARGETS_inst_)): inst_%: %$(EXEEXT)
 	$(INSTALL) -d $(DESTDIR)$(bindir)
 	$(INSTALL) $*$(EXEEXT) $(DESTDIR)$(bindir)
 	$(INSTALL) -d $(DESTDIR)$(mandir)/man1
@@ -185,7 +194,8 @@ inst_%: %$(EXEEXT)
 	  $(INSTALL) -m 644 $(srcdir)/$*.1 $(DESTDIR)$(mandir)/man1/$*.1; \
 	fi
 
-inst_dropbearmulti: $(addprefix insmulti, $(PROGRAMS)) 
+.PHONY: inst_dropbearmulti
+inst_dropbearmulti: $(PROGRAMS_insmulti)
 
 dropbear$(EXEEXT): $(HEADERS) $(dropbearobjs) $(LIBTOM_DEPS)
 	$(CC) $(LDFLAGS) -o $@ $(dropbearobjs) $(LIBTOM_LIBS) $(LIBS) @CRYPTLIB@
@@ -205,11 +215,16 @@ scp$(EXEEXT): $(HEADERS) $(scpobjs)
 dropbearmulti$(EXEEXT): $(HEADERS) $(dropbearmultiobjs) $(LIBTOM_DEPS)
 	$(CC) $(LDFLAGS) -o $@ $(dropbearmultiobjs) $(LIBTOM_LIBS) $(LIBS) @CRYPTLIB@
 
+.PHONY: multibinary
 multibinary: dropbearmulti$(EXEEXT)
 
-multilink: multibinary $(addprefix link, $(PROGRAMS))
+TARGETS_link=$(addprefix link, $(PROGRAMS))
 
-link%:
+.PHONY: multilink
+multilink: multibinary $(TARGETS_link)
+
+.PHONY: $(TARGETS_link)
+$(TARGETS_link): link%:
 	-rm -f $*$(EXEEXT)
 	-ln -s dropbearmulti$(EXEEXT) $*$(EXEEXT)
 
@@ -219,28 +234,33 @@ $(STATIC_LTC): options.h
 $(STATIC_LTM): options.h
 	$(MAKE) -C libtommath
 
-.PHONY : clean sizes thisclean distclean tidy ltc-clean ltm-clean
-
+.PHONY: ltc-clean
 ltc-clean:
 	$(MAKE) -C libtomcrypt clean
 
+.PHONY: ltm-clean
 ltm-clean:
 	$(MAKE) -C libtommath clean
 
+.PHONY: sizes
 sizes: dropbear
 	objdump -t dropbear|grep ".text"|cut -d "." -f 2|sort -rn
 
+.PHONY: clean
 clean: ltc-clean ltm-clean thisclean
 
+.PHONY: thisclean
 thisclean:
 	-rm -f dropbear$(EXEEXT) dbclient$(EXEEXT) dropbearkey$(EXEEXT) \
 			dropbearconvert$(EXEEXT) scp$(EXEEXT) scp-progress$(EXEEXT) \
 			dropbearmulti$(EXEEXT) *.o *.da *.bb *.bbg *.prof
 
+.PHONY: distclean
 distclean: clean tidy
 	-rm -f config-raw.h
 	-rm -f Makefile
 
+.PHONY: tidy
 tidy:
 	-rm -f *~ *.gcov */*~
 
