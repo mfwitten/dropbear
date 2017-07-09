@@ -215,19 +215,6 @@ scp$(EXEEXT): $(HEADERS) $(scpobjs)
 dropbearmulti$(EXEEXT): $(HEADERS) $(dropbearmultiobjs) $(LIBTOM_DEPS)
 	$(CC) $(LDFLAGS) -o $@ $(dropbearmultiobjs) $(LIBTOM_LIBS) $(LIBS) @CRYPTLIB@
 
-.PHONY: multibinary
-multibinary: dropbearmulti$(EXEEXT)
-
-TARGETS_link=$(addprefix link, $(PROGRAMS))
-
-.PHONY: multilink
-multilink: multibinary $(TARGETS_link)
-
-.PHONY: $(TARGETS_link)
-$(TARGETS_link): link%:
-	-rm -f $*$(EXEEXT)
-	-ln -s dropbearmulti$(EXEEXT) $*$(EXEEXT)
-
 $(STATIC_LTC): options.h
 	$(MAKE) -C libtomcrypt
 
