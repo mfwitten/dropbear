@@ -221,8 +221,6 @@ endef
 prereqs_dir:=build-system/prereqs
 include $(srcdir)/$(prereqs_dir)/include.mk
 
-# default_options.h is stored in version control, could not find a workaround
-# for parallel "make -j" and dependency rules.
 $(default_options_h): $(default_options_h_in)
 	@echo Making $@; \
 	$(srcdir)/build-system/options/ifndef_wrapper.sh $(srcdir) <$< >$@
@@ -291,6 +289,7 @@ thisclean:
 			dropbearconvert$(EXEEXT) scp$(EXEEXT) scp-progress$(EXEEXT) \
 			dropbearmulti$(EXEEXT) *.o *.da *.bb *.bbg *.prof
 	$(remove_dynamic_prereqs)
+	-rm -f default_options.h
 
 .PHONY: distclean
 distclean: clean tidy
