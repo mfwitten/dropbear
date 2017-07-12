@@ -55,7 +55,7 @@ endif # COMPILE_SIZE
 endif # COMPILE_DEBUG
 
 # adjust coverage set
-ifneq ($(filter $(shell arch), i386 i686 x86_64 amd64 ia64),)
+ifneq ($(filter $(shell uname -m), i386 i686 x86_64 amd64 ia64),)
    COVERAGE = test_standalone timing
    COVERAGE_APP = ./test && ./ltmtest
 else
