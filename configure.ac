@@ -830,6 +830,7 @@ AS_MKDIR_P(libtomcrypt/src/modes/ecb)
 AS_MKDIR_P(libtomcrypt/src/modes/ofb)
 AS_MKDIR_P(libtomcrypt/src/modes/f8)
 AS_MKDIR_P(libtomcrypt/src/modes/lrw)
+AS_MKDIR_P(libtomcrypt/src/modes/xts)
 AS_MKDIR_P(libtomcrypt/src/pk/asn1/der/bit)
 AS_MKDIR_P(libtomcrypt/src/pk/asn1/der/boolean)
 AS_MKDIR_P(libtomcrypt/src/pk/asn1/der/choice)
@@ -850,7 +851,7 @@ AS_MKDIR_P(libtomcrypt/src/pk/katja)
 AS_MKDIR_P(libtomcrypt/src/pk/pkcs1)
 AS_MKDIR_P(libtomcrypt/src/pk/rsa)
 AS_MKDIR_P(libtomcrypt/src/prngs)
-LIBTOM_FILES="libtomcrypt/Makefile libtommath/Makefile"
+LIBTOM_FILES='libtomcrypt/Makefile libtommath/Makefile libtommath/etc/Makefile libtommath/pics/Makefile'
 fi
 AC_CONFIG_HEADER(config-raw.h)
 AC_CONFIG_FILES(Makefile $LIBTOM_FILES)

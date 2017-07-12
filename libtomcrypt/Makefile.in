@@ -3,13 +3,13 @@
 # Tom St Denis
 # Modified by Clay Culver
 
+VPATH=@srcdir@
+srcdir=@srcdir@
+
 # The version
 VERSION=1.17
 
 PLATFORM := $(shell uname | sed -e 's/_.*//')
-
-
-srcdir=.
 
 # Compiler and Linker Names
 #CC=gcc
