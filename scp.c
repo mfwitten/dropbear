@@ -368,7 +368,7 @@ main(int argc, char **argv)
 			verbose_mode = 1;
 			break;
 		case 'q':
-#ifdef PROGRESS_METER
+#if PROGRESS_METER
 			addargs(&args, "-q");
 			showprogress = 0;
 #endif
@@ -672,7 +672,7 @@ next:			if (fd != -1) {
 			}
 			continue;
 		}
-#ifdef PROGRESS_METER
+#if PROGRESS_METER
 		if (showprogress)
 			start_progress_meter(curfile, stb.st_size, &statbytes);
 #endif
@@ -697,7 +697,7 @@ next:			if (fd != -1) {
 			if (limit_rate)
 				bwlimit(amt);
 		}
-#ifdef PROGRESS_METER
+#if PROGRESS_METER
 		if (showprogress)
 			stop_progress_meter();
 #endif
@@ -1005,7 +1005,7 @@ bad:			run_err("%s: %s", np, strerror(errno));
 		wrerr = NO;
 
 		statbytes = 0;
-#ifdef PROGRESS_METER
+#if PROGRESS_METER
 		if (showprogress)
 			start_progress_meter(curfile, size, &statbytes);
 #endif
@@ -1042,7 +1042,7 @@ bad:			run_err("%s: %s", np, strerror(errno));
 				cp = bp->buf;
 			}
 		}
-#ifdef PROGRESS_METER
+#if PROGRESS_METER
 		if (showprogress)
 			stop_progress_meter();
 #endif

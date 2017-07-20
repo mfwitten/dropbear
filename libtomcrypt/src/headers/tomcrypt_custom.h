@@ -64,7 +64,7 @@
 
    #define LTC_NO_PRNGS
    #define LTC_NO_PK
-#ifdef DROPBEAR_SMALL_CODE
+#if DROPBEAR_SMALL_CODE
 #define LTC_SMALL_CODE
 #endif
 /* These spit out warnings etc */
@@ -97,15 +97,15 @@
 /* #define LTC_NO_BSWAP */
 
 
-#ifdef DROPBEAR_BLOWFISH
+#if DROPBEAR_BLOWFISH
 #define LTC_BLOWFISH
 #endif
 
-#ifdef DROPBEAR_AES
+#if DROPBEAR_AES
 #define LTC_RIJNDAEL
 #endif
 
-#ifdef DROPBEAR_TWOFISH
+#if DROPBEAR_TWOFISH
 #define LTC_TWOFISH
 
 /* _TABLES tells it to use tables during setup, _SMALL means to use the smaller scheduled key format
@@ -117,47 +117,47 @@
 /*#define LTC_TWOFISH_TABLES*/
 #endif
 
-#ifdef DROPBEAR_3DES
+#if DROPBEAR_3DES
 #define LTC_DES
 #endif
 
 #define LTC_CBC_MODE
 
-#ifdef DROPBEAR_ENABLE_CTR_MODE
+#if DROPBEAR_ENABLE_CTR_MODE
 #define LTC_CTR_MODE
 #endif
 
 #define LTC_SHA1
 
-#ifdef DROPBEAR_MD5
+#if DROPBEAR_MD5
 #define LTC_MD5
 #endif
 
-#ifdef DROPBEAR_SHA256
+#if DROPBEAR_SHA256
 #define LTC_SHA256
 #endif
-#ifdef DROPBEAR_SHA384
+#if DROPBEAR_SHA384
 #define LTC_SHA384
 #endif
-#ifdef DROPBEAR_SHA512
+#if DROPBEAR_SHA512
 #define LTC_SHA512
 #endif
 
 #define LTC_HMAC
 
-#ifdef DROPBEAR_ECC
+#if DROPBEAR_ECC
 #define LTC_MECC
 #define LTC_ECC_SHAMIR
 #define LTC_ECC_TIMING_RESISTANT
 #define MPI
 #define LTM_DESC
-#ifdef DROPBEAR_ECC_256
+#if DROPBEAR_ECC_256
 #define ECC256
 #endif
-#ifdef DROPBEAR_ECC_384
+#if DROPBEAR_ECC_384
 #define ECC384
 #endif
-#ifdef DROPBEAR_ECC_521
+#if DROPBEAR_ECC_521
 #define ECC521
 #endif
 #endif

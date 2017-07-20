@@ -145,7 +145,7 @@ TARGETS=$(addsuffix $(EXEEXT), $(TARGETS_NAMES))
 
 # For backwards compatibility, `SCPPROGRESS' is still supported here.
 ifeq ($(SCPPROGRESS), 1)
-	CPPFLAGS+=-DPROGRESS_METER
+	CPPFLAGS+=-DPROGRESS_METER=1
 endif
 
 .PHONY: all

@@ -197,7 +197,7 @@
 
 #define DROPBEAR_CLI_MULTIHOP ((DROPBEAR_CLI_NETCAT) && (DROPBEAR_CLI_PROXYCMD))
 
-#define ENABLE_CONNECT_UNIX ((DROPBEAR_CLI_AGENTFWD) || (DROPBEAR_PRNGD_SOCKET))
+#define ENABLE_CONNECT_UNIX ((DROPBEAR_CLI_AGENTFWD) || (DROPBEAR_USE_PRNGD))
 
 /* if we're using authorized_keys or known_hosts */ 
 #define DROPBEAR_KEY_LINES ((DROPBEAR_CLIENT) || (DROPBEAR_SVR_PUBKEY_AUTH))
@@ -205,10 +205,6 @@
 /* Changing this is inadvisable, it appears to have problems
  * with flushing compressed data */
 #define DROPBEAR_ZLIB_MEM_LEVEL 8
-
-#if (DROPBEAR_SVR_PASSWORD_AUTH) && (DROPBEAR_SVR_PAM_AUTH)
-#error "You can't turn on PASSWORD and PAM auth both at once. Fix it in options.h"
-#endif
 
 /* We use dropbear_client and dropbear_server as shortcuts to avoid redundant
  * code, if we're just compiling as client or server */
@@ -267,6 +263,10 @@
 #else
 #define DROPBEAR_SERVER_TCP_FAST_OPEN 0
 #define DROPBEAR_CLIENT_TCP_FAST_OPEN 0
+#endif
+
+#ifndef DROPBEAR_FUZZ
+#define DROPBEAR_FUZZ 0
 #endif
 
 #endif /* DROPBEAR_SYSOPTIONS_H */

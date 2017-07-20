@@ -77,4 +77,4 @@ of the ssh binary, specified by _PATH_SSH_PROGRAM in options.h . By default
 the progress meter isn't compiled in to save space, you can enable it by 
 adding the following to CPPFLAGS:
 
-  -DPROGRESS_METER
+  -DPROGRESS_METER=1
