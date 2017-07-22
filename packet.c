@@ -332,9 +332,11 @@ void decrypt_packet() {
 		ses.payload_beginning = ses.payload->pos;
 		buf_setlen(ses.payload, ses.payload->pos + len);
 		/* copy payload */
-		//ses.payload = buf_new(len);
-		//memcpy(ses.payload->data, buf_getptr(ses.readbuf, len), len);
-		//buf_incrlen(ses.payload, len);
+		/*
+		ses.payload = buf_new(len);
+		memcpy(ses.payload->data, buf_getptr(ses.readbuf, len), len);
+		buf_incrlen(ses.payload, len);
+		*/
 	}
 	ses.readbuf = NULL;
 
