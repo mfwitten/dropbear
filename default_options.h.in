@@ -152,7 +152,7 @@
 #define DROPBEAR_SHA2_256_HMAC 1
 /* The default is to enable SHA2_512 only if ECDSA is enabled.
  */
-#define DROPBEAR_SHA2_512_HMAC (DROPBEAR_ECDSA)
+#define DROPBEAR_SHA2_512_HMAC DROPBEAR_ECDSA
 
 /* Set this to `1' to enable support for fingerprints.
  */
