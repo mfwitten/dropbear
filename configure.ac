@@ -18,6 +18,8 @@ AC_PROG_CC
 AC_PROG_INSTALL
 AC_PROG_MKDIR_P
 
+AC_CHECK_PROG([PAGER], [[less]], [[less]], [[more]])
+
 if test -z "$LD" ; then
 	LD=$CC
 fi

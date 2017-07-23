@@ -94,6 +94,8 @@ ifneq ($(PATH),$(PATH_old))
   $(call notify,$(NOTHING)  $(PATH))
 endif
 
+PAGER?=@PAGER@
+
 CPP=@CPP@
 CC=@CC@
 AR=@AR@
@@ -216,6 +218,7 @@ define targets_without_dynamic_prereqs :=
   distclean
   tidy
   $(default_options_h)
+  show-options
 endef
 
 prereqs_dir:=build-system/prereqs
@@ -271,6 +274,10 @@ libtommath:
 .PHONY: sizes
 sizes: dropbear
 	objdump -t dropbear|grep ".text"|cut -d "." -f 2|sort -rn
+
+.PHONY: show-options
+show-options: $(options_headers)
+	  @$(srcdir)/build-system/options/show.sh $(srcdir) | $(PAGER)
 
 .PHONY: ltc-clean
 ltc-clean:
