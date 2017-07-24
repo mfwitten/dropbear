@@ -852,7 +852,7 @@ AS_MKDIR_P(libtomcrypt/src/pk/rsa)
 AS_MKDIR_P(libtomcrypt/src/prngs)
 LIBTOM_FILES="libtomcrypt/Makefile libtommath/Makefile"
 fi
-AC_CONFIG_HEADER(config.h)
+AC_CONFIG_HEADER(config-raw.h)
 AC_CONFIG_FILES(Makefile $LIBTOM_FILES)
 AC_OUTPUT
 

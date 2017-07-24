@@ -16,6 +16,6 @@
 /scp
 /scp-progress
 Makefile
-config.h
-config.h.in
+/config-raw.h
+/config-raw.h.in
 configure
