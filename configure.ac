@@ -13,8 +13,10 @@ AC_SUBST(PATH)
 
 OLDCFLAGS="$CFLAGS"
 # Checks for programs.
+AC_PROG_CPP
 AC_PROG_CC
 AC_PROG_INSTALL
+AC_PROG_MKDIR_P
 
 if test -z "$LD" ; then
 	LD=$CC
@@ -26,6 +28,8 @@ if test -z "$OLDCFLAGS" && test "$GCC" = "yes"; then
 	CFLAGS="-Os -W -Wall -Wno-pointer-sign"
 	AC_MSG_NOTICE(No \$CFLAGS set... using '$CFLAGS' for GCC)
 fi
+
+m4_include([build-system/prereqs/include.ac])
 
 AC_MSG_CHECKING([if compiler '$CC' supports -fno-strict-overflow])
 OLDCFLAGS="$CFLAGS"

@@ -5,6 +5,10 @@
 VPATH=@srcdir@
 srcdir=@srcdir@
 
+ifeq ($(MAKELEVEL),0)
+  $(error Please run `make libtommath' from `$(abspath $(dir $(shell pwd)))')
+endif
+
 # So that libtommath can include Dropbear headers for options and m_burn()
 CPPFLAGS += -I$(srcdir) -I../libtomcrypt/src/headers/ -I$(srcdir)/../libtomcrypt/src/headers/ -I../ -I$(srcdir)/../
 
@@ -18,7 +22,7 @@ endif
 ifneq ($V,1)
 	@echo "   * ${CC} $@"
 endif
-	$(silent) $(CC) $(CPPFLAGS) $(CFLAGS) -c $^ -o $@
+	$(silent) $(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
 
 #default files to install
 ifndef LIBNAME
@@ -62,6 +66,9 @@ bn_s_mp_sqr.o bn_s_mp_sub.o
 $(LIBNAME):  $(OBJECTS)
 	$(AR) $(ARFLAGS) $@ $(OBJECTS)
 	$(RANLIB) $@
+
+bn_mp_clear.o: $(srcdir)/../dbhelpers.h
+$(OBJECTS): ../config.h
 
 #make a profiled library (takes a while!!!)
 #

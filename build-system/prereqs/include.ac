@@ -1,0 +1,123 @@
+[
+support() { ]AC_MSG_RESULT([[$1]])[; }
+
+output_looks_good()
+{
+  [ -f "$output" ] &&
+    grep -q -E '^[[:space:]]*[^[:space:]:][^:]*:' "$output" &&
+      grep -q -F "$header" "$output"
+}
+
+remove_files_and_variables()
+{
+  rm -f "$header"
+  rm -f "$output"
+  unset option header output
+}
+
+clean_up()
+{
+  eval "${1}FLAGS=\$OLD${1}FLAGS"
+  remove_files_and_variables
+}
+
+dynamic_prereq_test_MD()
+{]
+  AC_MSG_CHECKING([[if compiler '$CC' supports $option]])
+  AC_COMPILE_IFELSE(
+    [AC_LANG_PROGRAM([[#include "$header"]])],
+    [[
+      if output_looks_good; then
+        support yes
+	dynamic_prereqs_MD=$option
+      else
+        support no
+	dynamic_prereqs_MD=
+      fi
+    ]],
+    [[unsupported]]
+  )
+[}
+
+dynamic_prereq_test_M()
+{]
+  AC_MSG_CHECKING([[if preprocessor '$CPP' supports $option]])
+  AC_PREPROC_IFELSE(
+    [AC_LANG_PROGRAM([[#include "$header"]])],
+    [[
+      if output_looks_good; then
+        support yes
+	dynamic_prereqs_M=$option
+      else
+        support no
+	dynamic_prereqs_M=
+      fi
+    ]],
+    [[unsupported]]
+  )
+[}
+
+set_up_output()
+{
+  output=conftest.$1
+  rm -f "$output"
+}
+
+make_header()
+{
+  header=conftest.h
+  rm -f "$header"
+  touch "$header"
+}
+
+set_up_variables()
+{
+  eval "
+    OLD${1}FLAGS=\$${1}FLAGS
+    ${1}FLAGS=\"\$${1}FLAGS \$option\"
+  "
+}
+
+run_dynamic_prereq_test()
+{
+  option=$4
+
+  set_up_variables $1
+  make_header
+  set_up_output $2
+  dynamic_prereq_test_$3
+  clean_up $1
+}
+
+tear_down()
+{
+  unset support output_looks_good \
+        remove_files_and_variables \
+        clean_up \
+        dynamic_prereq_test_MD \
+        dynamic_prereq_test_M \
+        set_up_output \
+        make_header \
+        set_up_variables \
+        run_dynamic_prereq_test \
+        tear_down
+}
+]
+
+AC_SUBST([dynamic_prereqs_M])[
+  run_test='run_dynamic_prereq_test CPP i M'
+  $run_test -MM
+  if [ -z "$dynamic_prereqs_M" ]; then
+    $run_test -M
+  fi
+]
+
+AC_SUBST([dynamic_prereqs_MD])[
+  run_test='run_dynamic_prereq_test C d MD'
+  $run_test -MMD
+  if [ -z "$dynamic_prereqs_MD" ]; then
+    $run_test -MD
+  fi
+]
+
+[tear_down]

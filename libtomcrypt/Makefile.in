@@ -6,6 +6,10 @@
 VPATH=@srcdir@
 srcdir=@srcdir@
 
+ifeq ($(MAKELEVEL),0)
+  $(error Please run `make libtomcrypt' from `$(abspath $(dir $(shell pwd)))')
+endif
+
 # The version
 VERSION=1.17
 
@@ -263,6 +267,16 @@ src/hashes/sha2/sha256.o: src/hashes/sha2/sha256.c src/hashes/sha2/sha224.c
 #This rule makes the libtomcrypt library.
 library: $(LIBNAME)
 
+# This defines $(options_headers) and $(default_options_h) and ($default_options_h_name)
+options_headers_dir:=../
+include $(srcdir)/../build-system/options/headers.mk
+
+src/misc/zeromem.o: $(srcdir)/../dbhelpers.h
+src/math/ltm_desc.o: $(srcdir)/../libtommath/tommath.h \
+                     $(srcdir)/../libtommath/tommath_class.h \
+                     $(srcdir)/../libtommath/tommath_superclass.h
+
+$(OBJECTS): $(options_headers)
 $(OBJECTS): $(HEADERS)
 
 testprof/$(LIBTEST): 

@@ -17,19 +17,17 @@ ifndef PROGRAMS
 	PROGRAMS=dropbear dbclient dropbearkey dropbearconvert
 endif
 
+maxprograms := dropbear dbclient dropbearkey dropbearconvert scp dropbearmulti
+
 STATIC_LTC=libtomcrypt/libtomcrypt.a
 STATIC_LTM=libtommath/libtommath.a
 
 LIBTOM_LIBS=@LIBTOM_LIBS@
 
 ifeq (@BUNDLED_LIBTOM@, 1)
-LIBTOM_DEPS=$(STATIC_LTC) $(STATIC_LTM) 
-CPPFLAGS+=-I$(srcdir)/libtomcrypt/src/headers/
-LIBTOM_LIBS=$(STATIC_LTC) $(STATIC_LTM) 
-endif
-
-ifneq ($(wildcard localoptions.h),)
-CPPFLAGS+=-DLOCALOPTIONS_H_EXISTS
+LIBTOM_LIBS=$(STATIC_LTC) $(STATIC_LTM)
+LIBTOM_DEPS=$(LIBTOM_LIBS)
+CPPFLAGS+=-I$(srcdir)/libtomcrypt/src/headers
 endif
 
 COMMONOBJS=dbutil.o buffer.o dbhelpers.o \
@@ -55,23 +53,22 @@ CLISVROBJS=common-session.o packet.o common-algo.o common-kex.o \
 			tcp-accept.o listener.o process-packet.o dh_groups.o \
 			common-runopts.o circbuffer.o curve25519-donna.o list.o netio.o
 
-KEYOBJS=dropbearkey.o
-
-CONVERTOBJS=dropbearconvert.o keyimport.o
-
-HEADERS=options.h dbutil.h session.h packet.h algo.h ssh.h buffer.h kex.h \
-		dss.h bignum.h signkey.h rsa.h dbrandom.h service.h auth.h \
-		debug.h channel.h chansession.h config.h queue.h sshpty.h \
-		config-raw.h \
-		termcodes.h gendss.h genrsa.h runopts.h includes.h \
-		loginrec.h atomicio.h x11fwd.h agentfwd.h tcpfwd.h compat.h \
-		listener.h fake-rfc2553.h ecc.h ecdsa.h
-
 dropbearobjs=$(COMMONOBJS) $(CLISVROBJS) $(SVROBJS)
 dbclientobjs=$(COMMONOBJS) $(CLISVROBJS) $(CLIOBJS)
-dropbearkeyobjs=$(COMMONOBJS) $(KEYOBJS)
-dropbearconvertobjs=$(COMMONOBJS) $(CONVERTOBJS)
+dropbearkeyobjs=$(COMMONOBJS) dropbearkey.o
+dropbearconvertobjs=$(COMMONOBJS) dropbearconvert.o keyimport.o
 scpobjs=scp.o progressmeter.o atomicio.o scpmisc.o compat.o
+programobjs=$(sort $(foreach prog, $(PROGRAMS), $($(prog)objs)))
+dropbearmultiobjs=dbmulti.o $(programobjs)
+
+maxobjs=$(sort \
+  $(dropbearobjs) \
+  $(dbclientobjs) \
+  $(dropbearkeyobjs) \
+  $(dropbearconvertobjs) \
+  $(scpobjs) \
+  $(dropbearmultiobjs) \
+)
 
 VPATH=@srcdir@
 srcdir=@srcdir@
@@ -97,10 +94,12 @@ ifneq ($(PATH),$(PATH_old))
   $(call notify,$(NOTHING)  $(PATH))
 endif
 
+CPP=@CPP@
 CC=@CC@
 AR=@AR@
 RANLIB=@RANLIB@
 STRIP=@STRIP@
+MKDIR_P=@MKDIR_P@
 INSTALL=@INSTALL@
 CPPFLAGS+=@CPPFLAGS@ -I. -I$(srcdir)
 CFLAGS+=@CFLAGS@
@@ -110,6 +109,9 @@ LIBS+=@LIBS@
 EXEEXT=@EXEEXT@
 
 STATIC=@STATIC@
+
+dynamic_prereqs_M=@dynamic_prereqs_M@
+dynamic_prereqs_MD=@dynamic_prereqs_MD@
 
 # whether we're building client, server, or both for the common objects.
 # evilness so we detect 'dropbear' by itself as a word
@@ -122,7 +124,7 @@ endif
 
 
 # these are exported so that libtomcrypt's makefile will use them
-export CC
+export CPP CC
 export CPPFLAGS CFLAGS LDFLAGS
 export RANLIB AR STRIP
 
@@ -131,10 +133,11 @@ ifeq ($(STATIC), 1)
 endif
 
 ifeq ($(MULTI), 1)
-	dropbearmultiobjs=dbmulti.o $(sort $(foreach prog, $(PROGRAMS), $($(prog)objs)))
+	allobjs=$(dropbearmultiobjs)
 	CPPFLAGS+=$(addprefix -DDBMULTI_, $(PROGRAMS)) -DDROPBEAR_MULTI
 	TARGETS_NAMES=dropbearmulti
 else
+	allobjs=$(programobjs)
 	TARGETS_NAMES=$(PROGRAMS)
 endif
 
@@ -197,28 +200,64 @@ $(filter-out inst_dropbear,$(TARGETS_inst_)): inst_%: %$(EXEEXT)
 .PHONY: inst_dropbearmulti
 inst_dropbearmulti: $(PROGRAMS_insmulti)
 
-dropbear$(EXEEXT): $(HEADERS) $(dropbearobjs) $(LIBTOM_DEPS)
+# This defines $(options_headers) and $(default_options_h) and $(default_options_h_in)
+options_headers_dir:=
+include $(srcdir)/build-system/options/headers.mk
+
+define targets_without_dynamic_prereqs :=
+  $(STATIC_LTC)
+  $(STATIC_LTM)
+  libtomcrypt
+  libtommath
+  ltc-clean
+  ltm-clean
+  clean
+  thisclean
+  distclean
+  tidy
+  $(default_options_h)
+endef
+
+prereqs_dir:=build-system/prereqs
+include $(srcdir)/$(prereqs_dir)/include.mk
+
+$(allobjs): $(options_headers)
+
+dropbear$(EXEEXT): $(dropbearobjs) $(LIBTOM_DEPS)
 	$(CC) $(LDFLAGS) -o $@ $(dropbearobjs) $(LIBTOM_LIBS) $(LIBS) @CRYPTLIB@
 
-dbclient$(EXEEXT): $(HEADERS) $(dbclientobjs) $(LIBTOM_DEPS)
+dbclient$(EXEEXT): $(dbclientobjs) $(LIBTOM_DEPS)
 	$(CC) $(LDFLAGS) -o $@ $(dbclientobjs) $(LIBTOM_LIBS) $(LIBS)
 
-dropbearkey$(EXEEXT): $(HEADERS) $(dropbearkeyobjs) $(LIBTOM_DEPS)
+dropbearkey$(EXEEXT): $(dropbearkeyobjs) $(LIBTOM_DEPS)
 	$(CC) $(LDFLAGS) -o $@ $(dropbearkeyobjs) $(LIBTOM_LIBS) $(LIBS)
 
-dropbearconvert$(EXEEXT): $(HEADERS) $(dropbearconvertobjs) $(LIBTOM_DEPS)
+dropbearconvert$(EXEEXT): $(dropbearconvertobjs) $(LIBTOM_DEPS)
 	$(CC) $(LDFLAGS) -o $@ $(dropbearconvertobjs) $(LIBTOM_LIBS)
 
-scp$(EXEEXT): $(HEADERS) $(scpobjs)
+scp$(EXEEXT): $(scpobjs)
 	$(CC) $(LDFLAGS) -o $@ $(scpobjs)
 
-dropbearmulti$(EXEEXT): $(HEADERS) $(dropbearmultiobjs) $(LIBTOM_DEPS)
+dropbearmulti$(EXEEXT): $(dropbearmultiobjs) $(LIBTOM_DEPS)
 	$(CC) $(LDFLAGS) -o $@ $(dropbearmultiobjs) $(LIBTOM_LIBS) $(LIBS) @CRYPTLIB@
 
-$(STATIC_LTC): options.h
+# Experimentation has revealed that `make' won't consider whether
+# a target has been updated unless a recipe for that target has
+# been run; thus, the following variable is used to help human
+# readers understand that there is a recipe which does NOTHING.
+
+$(STATIC_LTC): libtomcrypt
+	$(NOTHING)
+
+$(STATIC_LTM): libtommath
+	$(NOTHING)
+
+.PHONY: libtomcrypt
+libtomcrypt: $(options_headers)
 	$(MAKE) -C libtomcrypt
 
-$(STATIC_LTM): options.h
+.PHONY: libtommath
+libtommath:
 	$(MAKE) -C libtommath
 
 .PHONY: ltc-clean
@@ -241,6 +280,7 @@ thisclean:
 	-rm -f dropbear$(EXEEXT) dbclient$(EXEEXT) dropbearkey$(EXEEXT) \
 			dropbearconvert$(EXEEXT) scp$(EXEEXT) scp-progress$(EXEEXT) \
 			dropbearmulti$(EXEEXT) *.o *.da *.bb *.bbg *.prof
+	$(remove_dynamic_prereqs)
 
 .PHONY: distclean
 distclean: clean tidy
@@ -253,8 +293,11 @@ tidy:
 
 # default_options.h is stored in version control, could not find a workaround
 # for parallel "make -j" and dependency rules.
-default_options.h: default_options.h.in 
+$(default_options_h): $(default_options_h_in)
 	echo "# > > > Generated from $^, edit that file instead !" > $@.tmp
 	echo >> $@.tmp
 	$(srcdir)/ifndef_wrapper.sh < $^ > $@.tmp
 	mv $@.tmp $@
+
+$(localoptions_h):
+	touch $(localoptions_h)

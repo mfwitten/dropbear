@@ -1,5 +1,6 @@
 *~
 *.o
+*.d
 *.a
 *.da
 *.bb
@@ -18,4 +19,5 @@
 Makefile
 /config-raw.h
 /config-raw.h.in
+/localoptions.h
 configure
