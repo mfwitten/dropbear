@@ -9,10 +9,10 @@ See default_options.h.in for a description of the available options.
 */
 
 #ifdef LOCALOPTIONS_H_EXISTS
-#include "localoptions.h"
+#include <localoptions.h>
 #endif
 
-#include "default_options.h"
+#include <default_options.h>
 
 /* Some other defines that mostly should be left alone are defined
  * in sysoptions.h */

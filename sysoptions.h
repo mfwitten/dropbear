@@ -3,6 +3,11 @@
  * This file is only included from options.h
  *******************************************************************/
 
+#ifndef DROPBEAR_SYSOPTIONS_H
+#define DROPBEAR_SYSOPTIONS_H
+
+#include "config.h"
+
 #ifndef DROPBEAR_VERSION
 #define DROPBEAR_VERSION "2017.75"
 #endif
@@ -264,4 +269,4 @@
 #define DROPBEAR_CLIENT_TCP_FAST_OPEN 0
 #endif
 
-/* no include guard for this file */
+#endif /* DROPBEAR_SYSOPTIONS_H */
