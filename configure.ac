@@ -23,8 +23,8 @@ AC_SUBST(LD)
 
 # set compile flags prior to other tests
 if test -z "$OLDCFLAGS" && test "$GCC" = "yes"; then
-	AC_MSG_NOTICE(No \$CFLAGS set... using "-Os -W -Wall" for GCC)
 	CFLAGS="-Os -W -Wall -Wno-pointer-sign"
+	AC_MSG_NOTICE(No \$CFLAGS set... using '$CFLAGS' for GCC)
 fi
 
 AC_MSG_CHECKING([if compiler '$CC' supports -fno-strict-overflow])
@@ -132,7 +132,7 @@ case "$host" in
 	;;
 
 *-*-solaris*)
-	CFLAGS="$CFLAGS -I/usr/local/include"
+	CPPFLAGS="$CPPFLAGS -I/usr/local/include"
 	LDFLAGS="$LDFLAGS -L/usr/local/lib -R/usr/local/lib"
 	conf_lastlog_location="/var/adm/lastlog"
 	AC_MSG_CHECKING(for obsolete utmp and wtmp in solaris2.x)

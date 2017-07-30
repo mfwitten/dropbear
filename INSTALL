@@ -33,7 +33,7 @@ Binaries can be stripped with "make strip"
 ============================================================================
 
 If you're compiling for a 386-class CPU, you will probably need to add
-CFLAGS=-DLTC_NO_BSWAP so that libtomcrypt doesn't use 486+ instructions.
+CPPFLAGS=-DLTC_NO_BSWAP so that libtomcrypt doesn't use 486+ instructions.
 
 ============================================================================
 
@@ -53,7 +53,7 @@ you should remove unneeded ciphers and MD5, by editing options.h
 It is possible to compile zlib in, by copying zlib.h and zconf.h into a
 subdirectory (ie zlibincludes), and 
 
-export CFLAGS="-Izlibincludes -I../zlibincludes"
+export CPPFLAGS="-Izlibincludes -I../zlibincludes"
 export LDFLAGS=/usr/lib/libz.a
 
 before ./configure and make.

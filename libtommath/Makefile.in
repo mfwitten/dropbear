@@ -5,7 +5,7 @@
 srcdir=.
 
 # So that libtommath can include Dropbear headers for options and m_burn()
-CFLAGS += -I$(srcdir) -I../libtomcrypt/src/headers/ -I$(srcdir)/../libtomcrypt/src/headers/ -I../ -I$(srcdir)/../
+CPPFLAGS += -I$(srcdir) -I../libtomcrypt/src/headers/ -I$(srcdir)/../libtomcrypt/src/headers/ -I../ -I$(srcdir)/../
 
 ifeq ($V,1)
 silent=
@@ -17,7 +17,7 @@ endif
 ifneq ($V,1)
 	@echo "   * ${CC} $@"
 endif
-	${silent} ${CC} -c ${CFLAGS} $^ -o $@
+	$(silent) $(CC) $(CPPFLAGS) $(CFLAGS) -c $^ -o $@
 
 #default files to install
 ifndef LIBNAME
@@ -77,11 +77,11 @@ profiled:
 #make a single object profiled library
 profiled_single:
 	perl gen.pl
-	$(CC) $(CFLAGS) -fprofile-arcs -DTESTING -c mpi.c -o mpi.o
-	$(CC) $(CFLAGS) -DTESTING -DTIMER demo/timing.c mpi.o -lgcov -o ltmtest
+	$(CC) $(CPPFLAGS) $(CFLAGS) -fprofile-arcs -DTESTING -c mpi.c -o mpi.o
+	$(CC) $(CPPFLAGS) $(CFLAGS) -DTESTING -DTIMER demo/timing.c mpi.o -lgcov -o ltmtest
 	./ltmtest
 	rm -f *.o ltmtest
-	$(CC) $(CFLAGS) -fbranch-probabilities -DTESTING -c mpi.c -o mpi.o
+	$(CC) $(CPPFLAGS) $(CFLAGS) -fbranch-probabilities -DTESTING -c mpi.c -o mpi.o
 	$(AR) $(ARFLAGS) $(LIBNAME) mpi.o
 	$(RANLIB) $(LIBNAME)	
 
@@ -92,17 +92,17 @@ install: $(LIBNAME)
 	install -m 644 $(HEADERS_PUB) $(DESTDIR)$(INCPATH)
 
 test: $(LIBNAME) demo/demo.o
-	$(CC) $(CFLAGS) demo/demo.o $(LIBNAME) $(LFLAGS) -o test
+	$(CC) $(CPPFLAGS) $(CFLAGS) demo/demo.o $(LIBNAME) $(LFLAGS) -o test
 
 test_standalone: $(LIBNAME) demo/demo.o
-	$(CC) $(CFLAGS) demo/demo.o $(LIBNAME) $(LFLAGS) -o test
+	$(CC) $(CPPFLAGS) $(CFLAGS) demo/demo.o $(LIBNAME) $(LFLAGS) -o test
 
 .PHONY: mtest
 mtest:
-	cd mtest ; $(CC) $(CFLAGS) -O0 mtest.c $(LFLAGS) -o mtest
+	cd mtest ; $(CC) $(CPPFLAGS) $(CFLAGS) -O0 mtest.c $(LFLAGS) -o mtest
 
 timing: $(LIBNAME)
-	$(CC) $(CFLAGS) -DTIMER demo/timing.c $(LIBNAME) $(LFLAGS) -o ltmtest
+	$(CC) $(CPPFLAGS) $(CFLAGS) -DTIMER demo/timing.c $(LIBNAME) $(LFLAGS) -o ltmtest
 
 coveralls: coverage
 	cpp-coveralls
