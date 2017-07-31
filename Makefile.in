@@ -221,6 +221,16 @@ endef
 prereqs_dir:=build-system/prereqs
 include $(srcdir)/$(prereqs_dir)/include.mk
 
+# default_options.h is stored in version control, could not find a workaround
+# for parallel "make -j" and dependency rules.
+$(default_options_h): $(default_options_h_in)
+	@echo Making $@; \
+	$(srcdir)/build-system/options/ifndef_wrapper.sh <$< >$@
+
+$(localoptions_h):
+	@echo Making $@; \
+	touch $(localoptions_h)
+
 $(allobjs): $(options_headers)
 
 dropbear$(EXEEXT): $(dropbearobjs) $(LIBTOM_DEPS)
@@ -260,6 +270,10 @@ libtomcrypt: $(options_headers)
 libtommath:
 	$(MAKE) -C libtommath
 
+.PHONY: sizes
+sizes: dropbear
+	objdump -t dropbear|grep ".text"|cut -d "." -f 2|sort -rn
+
 .PHONY: ltc-clean
 ltc-clean:
 	$(MAKE) -C libtomcrypt clean
@@ -267,10 +281,6 @@ ltc-clean:
 .PHONY: ltm-clean
 ltm-clean:
 	$(MAKE) -C libtommath clean
-
-.PHONY: sizes
-sizes: dropbear
-	objdump -t dropbear|grep ".text"|cut -d "." -f 2|sort -rn
 
 .PHONY: clean
 clean: ltc-clean ltm-clean thisclean
@@ -290,14 +300,3 @@ distclean: clean tidy
 .PHONY: tidy
 tidy:
 	-rm -f *~ *.gcov */*~
-
-# default_options.h is stored in version control, could not find a workaround
-# for parallel "make -j" and dependency rules.
-$(default_options_h): $(default_options_h_in)
-	echo "# > > > Generated from $^, edit that file instead !" > $@.tmp
-	echo >> $@.tmp
-	$(srcdir)/ifndef_wrapper.sh < $^ > $@.tmp
-	mv $@.tmp $@
-
-$(localoptions_h):
-	touch $(localoptions_h)
