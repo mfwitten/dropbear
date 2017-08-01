@@ -281,6 +281,10 @@ Homedir is prepended unless path begins with / */
  * not using the Dropbear client, you'll need to change it */
 #define DROPBEAR_PATH_SSH_PROGRAM "/usr/bin/dbclient"
 
+/* In order to save space, `scp' is built without a progress meter;
+ * define this to build the progress meter. */
+/*#define PROGRESS_METER*/
+
 /* Whether to log commands executed by a client. This only logs the 
  * (single) command sent to the server, not what a user did in a 
  * shell/sftp session etc. */

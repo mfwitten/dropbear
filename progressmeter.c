@@ -1,4 +1,3 @@
-#ifdef PROGRESS_METER
 /*
  * Copyright (c) 2003 Nils Nordman.  All rights reserved.
  *
@@ -30,6 +29,7 @@
 #include "atomicio.h"
 #include "scpmisc.h"
 
+#ifdef PROGRESS_METER
 #define DEFAULT_WINSIZE 80
 #define MAX_WINSIZE 512
 #define PADDING 1		/* padding between the progress indicators */

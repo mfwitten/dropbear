@@ -2,7 +2,7 @@
 # @configure_input@
 
 # invocation:
-# make PROGRAMS="dropbear dbclient scp" MULTI=1 SCPPROGRESS=1
+# make PROGRAMS="dropbear dbclient scp" MULTI=1
 #
 # to make a multiple-program binary "dropbearmulti".
 # This example will include dropbear, scp, dropbearkey, dropbearconvert, and
@@ -140,7 +140,7 @@ endif
 
 TARGETS=$(addsuffix $(EXEEXT), $(TARGETS_NAMES))
 
-# for the scp progress meter. The -D doesn't affect anything else.
+# For backwards compatibility, `SCPPROGRESS' is still supported here.
 ifeq ($(SCPPROGRESS), 1)
 	CPPFLAGS+=-DPROGRESS_METER
 endif
