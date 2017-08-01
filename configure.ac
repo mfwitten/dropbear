@@ -12,6 +12,7 @@ AC_CONFIG_SRCDIR(buffer.c)
 OLDCFLAGS="$CFLAGS"
 # Checks for programs.
 AC_PROG_CC
+AC_PROG_INSTALL
 
 if test -z "$LD" ; then
 	LD=$CC
