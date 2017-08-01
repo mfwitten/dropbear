@@ -8,6 +8,11 @@
 # This example will include dropbear, scp, dropbearkey, dropbearconvert, and
 # dbclient functionality, and includes the progress-bar functionality in scp.
 
+# It can often be very useful to have a variable that expands to the
+# empty string; while any undefined variable will do, it's probably
+# safest just to define one in particular:
+NOTHING:=
+
 ifndef PROGRAMS
 	PROGRAMS=dropbear dbclient dropbearkey dropbearconvert
 endif
@@ -80,6 +85,18 @@ sbindir=@sbindir@
 mandir=@mandir@
 
 .DELETE_ON_ERROR:
+
+PATH_old:=$(PATH)
+PATH:=@PATH@
+
+notify=$(info $1)
+
+ifneq ($(PATH),$(PATH_old))
+  $(call notify,Switching PATH from:)
+  $(call notify,$(NOTHING)  $(PATH_old))
+  $(call notify,to:)
+  $(call notify,$(NOTHING)  $(PATH))
+endif
 
 CC=@CC@
 AR=@AR@
