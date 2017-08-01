@@ -225,7 +225,7 @@ include $(srcdir)/$(prereqs_dir)/include.mk
 # for parallel "make -j" and dependency rules.
 $(default_options_h): $(default_options_h_in)
 	@echo Making $@; \
-	$(srcdir)/build-system/options/ifndef_wrapper.sh <$< >$@
+	$(srcdir)/build-system/options/ifndef_wrapper.sh $(srcdir) <$< >$@
 
 $(localoptions_h):
 	@echo Making $@; \
